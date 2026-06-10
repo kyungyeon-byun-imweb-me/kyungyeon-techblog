@@ -229,6 +229,62 @@ img {
   font-size: 1.125rem;
 }
 
+.home-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 3rem;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.375rem;
+}
+
+.pagination-link,
+.pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--modern-border);
+  border-radius: 0.5rem;
+  color: var(--modern-foreground);
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.pagination-link {
+  background: var(--modern-background);
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.pagination-link:hover,
+.pagination-link.active {
+  background: var(--modern-primary);
+  border-color: var(--modern-primary);
+  color: white;
+}
+
+.pagination-edge {
+  min-width: 5.75rem;
+}
+
+.pagination-ellipsis {
+  border-color: transparent;
+  color: var(--modern-muted-foreground);
+}
+
 .modern-post-card {
   background: var(--modern-card-bg);
   border-radius: 1rem;
@@ -520,6 +576,37 @@ img {
 .article-content .notion-text {
   margin-bottom: 1.5rem;
   line-height: 1.8;
+}
+
+.article-content table,
+.article-content .notion-simple-table,
+.article-content .notion-table,
+.article-content .notion-table-view {
+  width: 100%;
+  max-width: 100%;
+}
+
+.article-content .notion-simple-table {
+  table-layout: fixed;
+}
+
+.article-content .notion-simple-table td {
+  width: auto;
+}
+
+.article-content .notion-simple-table-cell {
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.article-content .notion-table {
+  min-width: 100%;
+}
+
+.article-content .notion-table-view {
+  overflow-x: auto;
 }
 
 .article-content blockquote,

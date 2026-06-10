@@ -1,0 +1,14 @@
+packages:
+  - .
+
+onlyBuiltDependencies:
+  - esbuild
+  - unrs-resolver
+
+ignoredBuiltDependencies:
+  - canvas
+
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+  canvas: false

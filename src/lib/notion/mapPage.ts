@@ -86,6 +86,21 @@ const pickCheckbox = (block: any, schema: any, names: string[]): boolean => {
   return text === "Yes"
 }
 
+const normalizePostNo = (value: string): string => {
+  const text = value.trim()
+  if (!text) return ""
+
+  if (/^\d+$/.test(text)) return text
+
+  const withoutCommas = text.replace(/,/g, "")
+  if (/^\d+$/.test(withoutCommas)) return withoutCommas
+
+  const integerDecimal = withoutCommas.match(/^(\d+)\.0+$/)
+  if (integerDecimal) return integerDecimal[1]
+
+  return slugify(text)
+}
+
 const pickThumbnail = (
   block: any,
   schema: any,
@@ -103,9 +118,6 @@ const pickThumbnail = (
   // file 속성 구조: [["filename.png", [["a", "https://..."]]]]
   const url = raw?.[0]?.[1]?.[0]?.[1]
   if (!url) return null
-  // 노션 신형 attachment 참조 (`attachment:<uuid>:<filename>`) 는 비공식
-  // API 로 실제 URL 을 풀어낼 수 없으므로 fallback 처리 (그라데이션 placeholder).
-  if (url.startsWith("attachment:")) return null
   return resolveImageUrl(url, block.id, recordMap)
 }
 
@@ -118,6 +130,10 @@ const resolveImageUrl = (
   if (!url) return url
   if (url.startsWith("/")) {
     return `https://www.notion.so${url}`
+  }
+
+  if (url.startsWith("attachment:")) {
+    return `https://www.notion.so/image/${encodeURIComponent(url)}?table=block&id=${blockId}&cache=v2`
   }
 
   // 기존 Gatsby/아임웹 블로그에서 쓰던 post-images 절대 URL은 현재 운영 도메인으로 정규화.
@@ -174,12 +190,22 @@ export const mapBlockToPost = (
   const status = (pickSelect(block, schema, ["status", "상태"]) ||
     "Public") as TPostStatus
 
+  const postNo = normalizePostNo(
+    pickText(block, schema, [
+      "postNo",
+      "post_no",
+      "post no",
+      "post number",
+      "번호",
+    ])
+  )
   const slugRaw = pickText(block, schema, ["slug", "url"])
-  const slugified = slugify(slugRaw || title)
+  const slugified = postNo || slugify(slugRaw || title)
   const slug = slugified || block.id
 
   return {
     id: block.id,
+    postNo: postNo || null,
     slug,
     title,
     summary: pickText(block, schema, ["summary", "description", "요약"]),

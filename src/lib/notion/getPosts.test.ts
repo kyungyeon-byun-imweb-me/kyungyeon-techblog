@@ -83,7 +83,39 @@ describe("snapshotFromRecordMap", () => {
     expect(posts[0].id).toBe("1")
   })
 
-  it("발행일 내림차순(최신 우선)으로 정렬한다", () => {
+  it("postNo 내림차순으로 정렬한다", () => {
+    const rm = buildRecordMap([
+      {
+        id: "1",
+        title: "postNo 1",
+        status: "Public",
+        postNo: 1,
+        date: "2026-05-20",
+      },
+      {
+        id: "2",
+        title: "postNo 3",
+        status: "Public",
+        postNo: 3,
+        date: "2026-01-10",
+      },
+      {
+        id: "3",
+        title: "postNo 2",
+        status: "Public",
+        postNo: 2,
+        date: "2026-03-15",
+      },
+    ])
+    const { posts } = snapshotFromRecordMap(rm)
+    expect(posts.map((p) => p.title)).toEqual([
+      "postNo 3",
+      "postNo 2",
+      "postNo 1",
+    ])
+  })
+
+  it("postNo 가 없으면 발행일 내림차순으로 정렬한다", () => {
     const rm = buildRecordMap([
       { id: "1", title: "오래된글", status: "Public", date: "2026-01-10" },
       { id: "2", title: "최신글", status: "Public", date: "2026-05-20" },

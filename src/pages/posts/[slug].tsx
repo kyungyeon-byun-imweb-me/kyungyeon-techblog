@@ -1,10 +1,10 @@
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next"
+import dynamic from "next/dynamic"
 import Head from "next/head"
 import Link from "next/link"
 import type { ExtendedRecordMap } from "notion-types"
 import CoverImage from "@/components/common/CoverImage"
 import ModernLayout from "@/components/layout/ModernLayout"
-import Comments from "@/components/post/Comments"
 import PostActions from "@/components/post/PostActions"
 import PostContent from "@/components/post/PostContent"
 import { getPostBySlug } from "@/lib/notion/getPostBySlug"
@@ -14,6 +14,10 @@ import { safeAsync } from "@/lib/utils/safeAsync"
 import type { TPost } from "@/types"
 
 const CONFIG = require("../../../site.config")
+
+const Comments = dynamic(() => import("@/components/post/Comments"), {
+  ssr: false,
+})
 
 type Props = {
   post: TPost

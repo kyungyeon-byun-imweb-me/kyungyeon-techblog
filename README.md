@@ -13,22 +13,24 @@ pnpm run dev
 
 - Notion Integration token은 필요 없습니다.
 - `notion-client` 비공식 public API를 사용하므로 Notion DB 페이지가 `Publish to web` 상태여야 합니다.
-- DB ID는 `NOTION_DATABASE_ID` 환경변수로만 지정합니다. 공개 저장소에 DB ID를 커밋하지 않습니다.
+- Notion source ID는 `NOTION_PAGE_ID` 환경변수로 지정합니다. 공개 저장소에 ID를 커밋하지 않습니다.
+- Full-page database는 DB ID도 동작하지만, inline database는 publish된 상위 페이지 ID를 사용해야 합니다.
 
 로컬에서는 `.env.local`을 만들고 다음 값을 넣습니다.
 
 ```bash
-NOTION_DATABASE_ID=your-notion-database-id
+NOTION_PAGE_ID=your-published-notion-page-id
 ```
 
-GitHub Actions 배포에서는 저장소 `Settings → Secrets and variables → Actions → Repository secrets`에 `NOTION_DATABASE_ID`를 추가합니다.
+GitHub Actions 배포에서는 저장소 `Settings → Secrets and variables → Actions → Repository secrets`에 `NOTION_PAGE_ID`를 추가합니다.
 
 지원하는 속성명:
 
 | 속성 | 타입 | Alias | 비고 |
 | --- | --- | --- | --- |
 | `title` | Title | 필수 | 글 제목 |
-| `slug` | Text | `slug`, `url` | 비어 있으면 제목으로 생성 |
+| `postNo` | Number/Text | `postNo`, `post_no`, `post no`, `post number`, `번호` | 있으면 URL이 `/posts/{postNo}/`가 됨 |
+| `slug` | Text | `slug`, `url` | `postNo`가 비어 있으면 slug, title 순서로 생성 |
 | `status` | Select | `status`, `상태` | `Public`, `공개`, `발행 완료`만 노출 |
 | `category` | Multi-select | `category`, `카테고리` | 홈 카테고리 필터 |
 | `tags` | Multi-select | `tags`, `태그` | 검색/상세 태그 |
@@ -37,6 +39,8 @@ GitHub Actions 배포에서는 저장소 `Settings → Secrets and variables →
 | `thumbnail` | File | `thumbnail`, `cover`, `썸네일` | 카드/상세 커버 |
 | `author` | Person | `author`, `authors`, `작성자` | 상세 메타 |
 | `featured` | Checkbox | `featured`, `추천`, `pinned` | 홈 Featured 우선 노출 |
+
+글 목록은 `postNo` 숫자 내림차순으로 정렬됩니다. `postNo`가 없는 글은 뒤로 밀리고, 그 안에서는 `date` 내림차순으로 정렬됩니다.
 
 ## Build
 

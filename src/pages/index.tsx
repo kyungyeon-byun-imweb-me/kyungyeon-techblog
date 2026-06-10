@@ -115,7 +115,7 @@ export default function HomePage({
               <h3 className="section-title">Featured Article</h3>
               <div className="featured-grid">
                 {visibleFeatured.map((post) => (
-                  <ModernPostCard key={post.id} post={post} featured />
+                  <ModernPostCard key={post.id} post={post} />
                 ))}
               </div>
             </div>

@@ -44,6 +44,25 @@ const PUBLISHED_STATUSES = new Set(["Public", "공개", "발행 완료"])
 export const isPublishedStatus = (status: string): boolean =>
   PUBLISHED_STATUSES.has(status)
 
+const postNoSortValue = (postNo: string | null): number | null => {
+  if (!postNo) return null
+  const numeric = Number(postNo)
+  return Number.isFinite(numeric) ? numeric : null
+}
+
+export const comparePosts = (a: TPost, b: TPost): number => {
+  const aPostNo = postNoSortValue(a.postNo)
+  const bPostNo = postNoSortValue(b.postNo)
+
+  if (aPostNo !== null && bPostNo !== null && aPostNo !== bPostNo) {
+    return bPostNo - aPostNo
+  }
+  if (aPostNo !== null && bPostNo === null) return -1
+  if (aPostNo === null && bPostNo !== null) return 1
+
+  return a.date < b.date ? 1 : -1
+}
+
 // recordMap 에서 첫 컬렉션의 schema 와 (정렬 전) 행 block id 목록을 추출.
 // 네트워크 I/O 없이 순수하게 동작 → 단위 테스트 가능.
 export const extractCollection = (
@@ -81,7 +100,7 @@ export const snapshotFromRecordMap = (
   }
   const posts = allPosts
     .filter((p) => isPublishedStatus(p.status))
-    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .sort(comparePosts)
 
   // ── categories: 스키마 정의 순서로 고정, 0건 카테고리도 노출 ──────────
   const categoryPropId = findPropId(schema, ["category", "카테고리"])

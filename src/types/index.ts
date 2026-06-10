@@ -10,6 +10,7 @@ export type TAuthor = {
 
 export type TPost = {
   id: string
+  postNo: string | null
   slug: string
   title: string
   summary: string

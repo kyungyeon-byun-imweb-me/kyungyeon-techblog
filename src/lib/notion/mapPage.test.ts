@@ -63,12 +63,54 @@ describe("mapBlockToPost", () => {
     expect(post.authors).toEqual([])
   })
 
+  it("postNo 가 있으면 숫자 URL slug 로 우선 사용한다", () => {
+    const { block, recordMap } = blockOf("1", [
+      { id: "1", title: "Hello World", postNo: 42, status: "Public" },
+    ])
+    const post = mapBlockToPost(block, SCHEMA, recordMap)
+    expect(post.postNo).toBe("42")
+    expect(post.slug).toBe("42")
+  })
+
+  it("postNo 의 콤마와 정수형 소수 표기를 URL 용 숫자로 정규화한다", () => {
+    const comma = blockOf("1", [
+      { id: "1", title: "A", postNo: "1,000", status: "Public" },
+    ])
+    const decimal = blockOf("2", [
+      { id: "2", title: "B", postNo: "1000.0", status: "Public" },
+    ])
+
+    expect(mapBlockToPost(comma.block, SCHEMA, comma.recordMap).slug).toBe(
+      "1000"
+    )
+    expect(mapBlockToPost(decimal.block, SCHEMA, decimal.recordMap).slug).toBe(
+      "1000"
+    )
+  })
+
   it("slug 가 비면 title 로부터 생성한다", () => {
     const { block, recordMap } = blockOf("1", [
       { id: "1", title: "Hello World", status: "Public" },
     ])
     const post = mapBlockToPost(block, SCHEMA, recordMap)
+    expect(post.postNo).toBeNull()
     expect(post.slug).toBe("hello-world")
+  })
+
+  it("thumbnail file attachment 를 Notion 이미지 프록시 URL 로 변환한다", () => {
+    const { block, recordMap } = blockOf("1", [
+      {
+        id: "1",
+        title: "썸네일 글",
+        status: "Public",
+        thumbnail: "attachment:abc-123:image.png",
+      },
+    ])
+    const post = mapBlockToPost(block, SCHEMA, recordMap)
+
+    expect(post.cover).toBe(
+      "https://www.notion.so/image/attachment%3Aabc-123%3Aimage.png?table=block&id=1&cache=v2"
+    )
   })
 
   it("title 도 slug 도 없으면 block id 를 slug 로 쓴다", () => {

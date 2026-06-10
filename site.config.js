@@ -1,4 +1,7 @@
 // 사이트 전역 설정. Notion 데이터베이스와 블로그 메타데이터를 이 파일에서 관리합니다.
+const NOTION_SOURCE_ID =
+  process.env.NOTION_PAGE_ID || process.env.NOTION_DATABASE_ID || ""
+
 const CONFIG = {
   // ── 사이트 기본 정보 ──────────────────────────────────────────────────────
   blog: {
@@ -32,8 +35,9 @@ const CONFIG = {
   // ── Notion 연동 ──────────────────────────────────────────────────────────
   // notion-client (비공식 API). 토큰 불필요. DB 가 "Publish to web" 되어 있어야 함.
   notion: {
-    // 공개 저장소에 DB ID 를 남기지 않기 위해 환경변수에서만 읽습니다.
-    databaseId: process.env.NOTION_DATABASE_ID || "",
+    // notion-client 는 공개된 page/block ID 를 읽습니다.
+    // Full-page DB 는 DB ID 가 동작하지만, inline DB 는 상위 페이지 ID 를 넣어야 합니다.
+    databaseId: NOTION_SOURCE_ID,
   },
 
   // ── 네비게이션 ───────────────────────────────────────────────────────────

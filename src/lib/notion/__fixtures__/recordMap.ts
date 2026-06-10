@@ -6,16 +6,19 @@ import type { ExtendedRecordMap } from "notion-types"
 
 // schema 의 hash id (실제로는 4자 해시지만 테스트에선 의미 있는 키 사용)
 export const PROP = {
+  postNo: "p_no",
   status: "p_st",
   category: "p_cat",
   tags: "p_tag",
   summary: "p_sum",
   date: "p_date",
+  thumbnail: "p_thumb",
 } as const
 
 export const SCHEMA = {
   // title 은 notion 에서 항상 "title" 키로 옵니다 (hash id 아님)
   title: { name: "Name", type: "title" },
+  [PROP.postNo]: { name: "postNo", type: "number" },
   [PROP.status]: { name: "status", type: "select" },
   [PROP.category]: {
     name: "category",
@@ -26,16 +29,19 @@ export const SCHEMA = {
   [PROP.tags]: { name: "tags", type: "multi_select" },
   [PROP.summary]: { name: "summary", type: "text" },
   [PROP.date]: { name: "date", type: "date" },
+  [PROP.thumbnail]: { name: "thumbnail", type: "file" },
 }
 
 export type PostInput = {
   id: string
   title: string
+  postNo?: string | number
   status?: string
   category?: string[]
   tags?: string[]
   summary?: string
   date?: string // ISO "YYYY-MM-DD"
+  thumbnail?: string
   type?: string // 기본 "page"
 }
 
@@ -47,6 +53,8 @@ const buildBlock = (post: PostInput) => {
   const properties: Record<string, unknown> = {
     title: textProp(post.title),
   }
+  if (post.postNo !== undefined)
+    properties[PROP.postNo] = textProp(String(post.postNo))
   if (post.status !== undefined) properties[PROP.status] = textProp(post.status)
   if (post.category !== undefined)
     properties[PROP.category] = multiSelectProp(post.category)
@@ -54,6 +62,11 @@ const buildBlock = (post: PostInput) => {
   if (post.summary !== undefined)
     properties[PROP.summary] = textProp(post.summary)
   if (post.date !== undefined) properties[PROP.date] = dateProp(post.date)
+  if (post.thumbnail !== undefined) {
+    properties[PROP.thumbnail] = [
+      ["thumbnail.png", [["a", post.thumbnail]]],
+    ]
+  }
 
   return {
     role: "reader",

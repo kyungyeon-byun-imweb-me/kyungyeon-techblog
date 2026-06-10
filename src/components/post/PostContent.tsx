@@ -3,6 +3,16 @@ import type { CodeBlock, Decoration, ExtendedRecordMap } from "notion-types"
 import { useState } from "react"
 import { NotionRenderer } from "react-notion-x"
 
+const Prism = require("prismjs")
+require("prismjs/components/prism-bash")
+require("prismjs/components/prism-css")
+require("prismjs/components/prism-json")
+require("prismjs/components/prism-jsx")
+require("prismjs/components/prism-markup")
+require("prismjs/components/prism-sql")
+require("prismjs/components/prism-typescript")
+require("prismjs/components/prism-tsx")
+
 const Collection = dynamic(() =>
   import("react-notion-x/build/third-party/collection").then((m) => m.Collection)
 )
@@ -21,6 +31,18 @@ const normalizeLanguage = (language: string) => {
   const normalized = language.trim().toLowerCase() || "plain text"
 
   switch (normalized) {
+    case "js":
+      return "javascript"
+    case "ts":
+      return "typescript"
+    case "shell":
+    case "sh":
+    case "zsh":
+      return "bash"
+    case "postgres":
+    case "postgresql":
+    case "mysql":
+      return "sql"
     case "c++":
       return "cpp"
     case "f#":
@@ -28,6 +50,20 @@ const normalizeLanguage = (language: string) => {
     default:
       return normalized.replace(/\s+/g, "-")
   }
+}
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+
+const highlightCode = (content: string, language: string) => {
+  const grammar = Prism.languages[language]
+  if (!grammar) return escapeHtml(content)
+  return Prism.highlight(content, grammar, language)
 }
 
 function PlainCode({
@@ -40,6 +76,7 @@ function PlainCode({
 }) {
   const content = toPlainText(block.properties.title)
   const language = normalizeLanguage(toPlainText(block.properties.language))
+  const highlighted = highlightCode(content, language)
   const caption = toPlainText(block.properties.caption)
   const classes = ["notion-code", `language-${language}`, className]
     .filter(Boolean)
@@ -79,7 +116,10 @@ function PlainCode({
           {copied ? "Copied" : "Copy"}
         </button>
         <pre className={classes} tabIndex={0}>
-          <code className={`language-${language}`}>{content}</code>
+          <code
+            className={`language-${language}`}
+            dangerouslySetInnerHTML={{ __html: highlighted }}
+          />
         </pre>
       </div>
       {caption && <figcaption className="notion-asset-caption">{caption}</figcaption>}

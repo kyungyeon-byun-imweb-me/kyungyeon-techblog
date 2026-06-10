@@ -645,6 +645,50 @@ img {
   overflow-wrap: normal;
 }
 
+.article-content pre code .token.comment,
+.article-content pre code .token.prolog,
+.article-content pre code .token.doctype,
+.article-content pre code .token.cdata {
+  color: #8b9bb4;
+  font-style: italic;
+}
+
+.article-content pre code .token.keyword,
+.article-content pre code .token.important,
+.article-content pre code .token.selector,
+.article-content pre code .token.atrule {
+  color: #ff6b7a;
+  font-weight: 700;
+}
+
+.article-content pre code .token.string,
+.article-content pre code .token.char,
+.article-content pre code .token.attr-value {
+  color: #a5d6ff;
+}
+
+.article-content pre code .token.number,
+.article-content pre code .token.boolean,
+.article-content pre code .token.constant {
+  color: #f2a6d8;
+}
+
+.article-content pre code .token.function,
+.article-content pre code .token.class-name {
+  color: #ffd166;
+}
+
+.article-content pre code .token.operator,
+.article-content pre code .token.punctuation {
+  color: #d7deea;
+}
+
+.article-content pre code .token.property,
+.article-content pre code .token.tag,
+.article-content pre code .token.attr-name {
+  color: #7dd3fc;
+}
+
 .article-content img,
 .article-content .notion-asset-wrapper img {
   max-width: 100%;

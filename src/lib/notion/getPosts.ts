@@ -6,12 +6,29 @@ import type { TPost } from "@/types"
 
 const CONFIG = require("../../../site.config")
 
-// 노션 DB 는 한 빌드에서 여러 페이지(/, /tags, /search, /posts/[slug]) 의
-// getStaticProps/Paths 가 동시에 요청합니다. 동일한 DB 를 매번 새로 fetch 하지
-// 않도록 production 빌드에서는 첫 fetch 결과를 모듈 캐시에 보관합니다.
-// dev 모드에서는 노션 변경이 즉시 반영되어야 해서 캐시하지 않습니다.
-const SHOULD_MEMO = process.env.NODE_ENV === "production"
-let cachedSnapshot: Promise<DbSnapshot> | null = null
+// 노션 DB 는 dev 서버와 빌드에서 여러 페이지(/, /tags, /search, /posts/[slug])가
+// 동시에 요청합니다. public Notion API 는 rate limit 이 낮기 때문에 dev/prod 모두
+// 같은 프로세스 안에서는 첫 snapshot Promise 를 재사용합니다.
+type SnapshotCacheStore = {
+  promise: Promise<DbSnapshot> | null
+  error: unknown | null
+  errorAt: number | null
+}
+
+const globalForSnapshot = globalThis as typeof globalThis & {
+  __kyungyeonTechblogDbSnapshotCacheV2?: SnapshotCacheStore
+}
+
+if (!globalForSnapshot.__kyungyeonTechblogDbSnapshotCacheV2) {
+  globalForSnapshot.__kyungyeonTechblogDbSnapshotCacheV2 = {
+    promise: null,
+    error: null,
+    errorAt: null,
+  }
+}
+
+const snapshotCache = globalForSnapshot.__kyungyeonTechblogDbSnapshotCacheV2
+const SNAPSHOT_ERROR_COOLDOWN_MS = 60 * 1000
 
 export type DbSnapshot = {
   posts: TPost[]
@@ -146,11 +163,31 @@ const buildSnapshot = async (): Promise<DbSnapshot> => {
   return snapshotFromRecordMap(recordMap)
 }
 
-// 단일 진입점. production 에서는 첫 호출만 실제 fetch, 이후엔 메모이즈된 Promise 반환.
+// 단일 진입점. 첫 호출만 실제 fetch/변환하고 이후엔 메모이즈된 Promise 반환.
 export const getDbSnapshot = (): Promise<DbSnapshot> => {
-  if (SHOULD_MEMO && cachedSnapshot) return cachedSnapshot
+  if (snapshotCache.promise) return snapshotCache.promise
+  if (
+    snapshotCache.error &&
+    snapshotCache.errorAt &&
+    Date.now() - snapshotCache.errorAt < SNAPSHOT_ERROR_COOLDOWN_MS
+  ) {
+    return Promise.reject(snapshotCache.error)
+  }
+
   const promise = buildSnapshot()
-  if (SHOULD_MEMO) cachedSnapshot = promise
+    .then((snapshot) => {
+      snapshotCache.error = null
+      snapshotCache.errorAt = null
+      return snapshot
+    })
+    .catch((error) => {
+      snapshotCache.promise = null
+      snapshotCache.error = error
+      snapshotCache.errorAt = Date.now()
+      throw error
+    })
+
+  snapshotCache.promise = promise
   return promise
 }
 

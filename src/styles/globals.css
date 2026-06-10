@@ -578,6 +578,10 @@ img {
 
 .article-content pre,
 .article-content .notion-code {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background: #2d3748;
   color: #e2e8f0;
   padding: 1.5rem;
@@ -593,6 +597,9 @@ img {
 
 .article-content .notion-code-wrapper {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   margin: 1.5rem 0;
 }
 

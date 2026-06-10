@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto"
-import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { NotionAPI } from "notion-client"
 import type { ExtendedRecordMap } from "notion-types"
@@ -38,6 +38,14 @@ if (!globalForNotion.__kyungyeonTechblogNotionCacheV2) {
 const notionCache = globalForNotion.__kyungyeonTechblogNotionCacheV2
 const ERROR_COOLDOWN_MS = 60 * 1000
 const DISK_CACHE_DIR = path.join(process.cwd(), ".next", "cache", "notion")
+const NETWORK_LOCK_DIR = path.join(DISK_CACHE_DIR, ".network-lock")
+const NETWORK_LAST_REQUEST_FILE = path.join(DISK_CACHE_DIR, ".last-request")
+const NETWORK_LOCK_STALE_MS = 2 * 60 * 1000
+const NETWORK_LOCK_POLL_MS = 250
+const NOTION_REQUEST_INTERVAL_MS = Number(
+  process.env.NOTION_REQUEST_INTERVAL_MS || 1500
+)
+const NOTION_MAX_ATTEMPTS = Number(process.env.NOTION_MAX_ATTEMPTS || 6)
 
 const diskCachePath = (key: string) =>
   path.join(DISK_CACHE_DIR, `${createHash("sha1").update(key).digest("hex")}.json`)
@@ -62,6 +70,105 @@ const writeDiskPageCache = async (
   } catch {
     // Disk cache is best-effort. Build output must not depend on it.
   }
+}
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms))
+
+const isRetryableNotionError = (error: unknown): boolean => {
+  const err = error as { status?: number; statusCode?: number; message?: string }
+  const status = err.status ?? err.statusCode
+  if (status === 429 || status === 408) return true
+  if (status && status >= 500) return true
+  return /429|too many requests|rate limit/i.test(err.message || "")
+}
+
+const retryDelayMs = (attempt: number): number =>
+  Math.min(30_000, 2000 * 2 ** attempt)
+
+const acquireNetworkLock = async (): Promise<void> => {
+  await mkdir(DISK_CACHE_DIR, { recursive: true })
+  while (true) {
+    try {
+      await mkdir(NETWORK_LOCK_DIR, { recursive: false })
+      return
+    } catch {
+      try {
+        const lockStat = await stat(NETWORK_LOCK_DIR)
+        if (Date.now() - lockStat.mtimeMs > NETWORK_LOCK_STALE_MS) {
+          await rm(NETWORK_LOCK_DIR, { recursive: true, force: true })
+          continue
+        }
+      } catch {
+        // The lock disappeared between mkdir/stat. Retry immediately.
+      }
+      await sleep(NETWORK_LOCK_POLL_MS)
+    }
+  }
+}
+
+const releaseNetworkLock = async (): Promise<void> => {
+  await rm(NETWORK_LOCK_DIR, { recursive: true, force: true }).catch(() => {})
+}
+
+const waitForNetworkTurn = async (): Promise<void> => {
+  await mkdir(DISK_CACHE_DIR, { recursive: true })
+  const lastRequest = Number(await readFile(NETWORK_LAST_REQUEST_FILE, "utf8").catch(() => "0"))
+  const waitMs = Math.max(0, lastRequest + NOTION_REQUEST_INTERVAL_MS - Date.now())
+  if (waitMs > 0) await sleep(waitMs)
+  await writeFile(NETWORK_LAST_REQUEST_FILE, String(Date.now()), "utf8")
+}
+
+const withNetworkLock = async <T>(fn: () => Promise<T>): Promise<T> => {
+  await acquireNetworkLock()
+  try {
+    await waitForNetworkTurn()
+    return await fn()
+  } finally {
+    await releaseNetworkLock()
+  }
+}
+
+const getPageWithRetry = async (key: string): Promise<ExtendedRecordMap> => {
+  for (let attempt = 0; attempt < NOTION_MAX_ATTEMPTS; attempt += 1) {
+    const cached = await readDiskPageCache(key)
+    if (cached) return cached
+
+    try {
+      return await withNetworkLock(async () => {
+        const lockedCached = await readDiskPageCache(key)
+        if (lockedCached) return lockedCached
+        return notion.getPage(key, DEFAULT_FETCH_OPTIONS as any)
+      })
+    } catch (error) {
+      if (!isRetryableNotionError(error) || attempt === NOTION_MAX_ATTEMPTS - 1) {
+        throw error
+      }
+      await sleep(retryDelayMs(attempt))
+    }
+  }
+
+  throw new Error(`Failed to fetch Notion page after ${NOTION_MAX_ATTEMPTS} attempts.`)
+}
+
+const getUsersWithRetry = async (
+  userIds: string[]
+): Promise<Record<string, unknown> | null> => {
+  for (let attempt = 0; attempt < NOTION_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const resp: any = await withNetworkLock(() =>
+        (notion as any).getUsers(userIds)
+      )
+      return resp?.recordMapWithRoles?.notion_user ?? null
+    } catch (error) {
+      if (!isRetryableNotionError(error) || attempt === NOTION_MAX_ATTEMPTS - 1) {
+        return null
+      }
+      await sleep(retryDelayMs(attempt))
+    }
+  }
+
+  return null
 }
 
 // 컬렉션(=글 DB) 한 번에 가져오는 최대 행 수.
@@ -108,8 +215,8 @@ export const fetchPage = (pageId: string): Promise<ExtendedRecordMap> => {
     })
   }
 
-  const promise = notion
-    .getPage(key, DEFAULT_FETCH_OPTIONS as any)
+  const promise = readDiskPageCache(key)
+    .then((diskRecordMap) => diskRecordMap || getPageWithRetry(key))
     .then((recordMap) => {
       void writeDiskPageCache(key, recordMap)
       notionCache.pages.set(key, {
@@ -148,12 +255,7 @@ export const fetchUsers = async (
   if (cached) return cached.promise
 
   const promise = (async () => {
-    try {
-      const resp: any = await (notion as any).getUsers(uniqueUserIds)
-      return resp?.recordMapWithRoles?.notion_user ?? null
-    } catch {
-      return null
-    }
+    return getUsersWithRetry(uniqueUserIds)
   })()
 
   notionCache.users.set(key, { promise })

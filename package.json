@@ -19,7 +19,7 @@
     "@giscus/react": "^3.1.0",
     "feed": "^5.2.1",
     "katex": "^0.16.11",
-    "next": "14.2.5",
+    "next": "15.5.18",
     "notion-client": "^7.10.0",
     "notion-types": "^7.10.0",
     "prismjs": "^1.29.0",

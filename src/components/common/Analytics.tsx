@@ -11,7 +11,7 @@ const CONFIG = require("../../../site.config")
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void
-    dataLayer?: Array<Record<string, unknown> | IArguments>
+    dataLayer?: unknown[]
   }
 }
 
@@ -39,6 +39,7 @@ export default function Analytics() {
   if (!enabled) return null
 
   const id = cfg.measurementId
+  const defaultEventParamsJson = JSON.stringify(defaultEventParams || {})
 
   return (
     <>
@@ -49,15 +50,14 @@ export default function Analytics() {
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
+          const defaultEventParams = ${defaultEventParamsJson};
+          function gtag(){window.dataLayer.push(arguments);}
           window.gtag = gtag;
           gtag('js', new Date());
           gtag('config', '${id}', {
             anonymize_ip: true,
             send_page_view: true,
-            ${Object.entries(defaultEventParams || {})
-              .map(([key, value]) => `${JSON.stringify(key)}: ${JSON.stringify(value)},`)
-              .join("\n            ")}
+            ...defaultEventParams,
           });
         `}
       </Script>

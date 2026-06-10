@@ -28,7 +28,7 @@
     "react-notion-x": "^7.10.0"
   },
   "devDependencies": {
-    "@types/node": "^20.14.10",
+    "@types/node": "^24.0.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
@@ -41,6 +41,6 @@
     "vitest": "^4.1.7"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=24.0.0"
   }
 }

@@ -39,6 +39,11 @@ type Collection = {
   ids: string[]
 }
 
+const PUBLISHED_STATUSES = new Set(["Public", "공개", "발행 완료"])
+
+export const isPublishedStatus = (status: string): boolean =>
+  PUBLISHED_STATUSES.has(status)
+
 // recordMap 에서 첫 컬렉션의 schema 와 (정렬 전) 행 block id 목록을 추출.
 // 네트워크 I/O 없이 순수하게 동작 → 단위 테스트 가능.
 export const extractCollection = (
@@ -75,7 +80,7 @@ export const snapshotFromRecordMap = (
     allPosts.push(mapBlockToPost(block, schema, recordMap))
   }
   const posts = allPosts
-    .filter((p) => p.status === "Public" || (p.status as string) === "공개")
+    .filter((p) => isPublishedStatus(p.status))
     .sort((a, b) => (a.date < b.date ? 1 : -1))
 
   // ── categories: 스키마 정의 순서로 고정, 0건 카테고리도 노출 ──────────

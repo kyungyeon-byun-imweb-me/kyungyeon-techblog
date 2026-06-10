@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import {
   extractBlockIds,
   extractCollection,
+  isPublishedStatus,
   snapshotFromRecordMap,
 } from "./getPosts"
 import { buildRecordMap, SCHEMA } from "./__fixtures__/recordMap"
@@ -41,15 +42,28 @@ describe("extractCollection", () => {
 })
 
 describe("snapshotFromRecordMap", () => {
-  it("Public 글만 노출하고 PublicOnDetail/Draft 등은 제외한다", () => {
+  it("게시 상태 글만 노출하고 PublicOnDetail/Draft 등은 제외한다", () => {
     const rm = buildRecordMap([
       { id: "1", title: "공개글", status: "Public" },
       { id: "2", title: "상세전용", status: "PublicOnDetail" },
       { id: "3", title: "초안", status: "Draft" },
       { id: "4", title: "한글공개", status: "공개" },
+      { id: "5", title: "발행완료", status: "발행 완료" },
     ])
     const { posts } = snapshotFromRecordMap(rm)
-    expect(posts.map((p) => p.title).sort()).toEqual(["공개글", "한글공개"])
+    expect(posts.map((p) => p.title).sort()).toEqual([
+      "공개글",
+      "발행완료",
+      "한글공개",
+    ])
+  })
+
+  it("게시 상태 alias 를 판별한다", () => {
+    expect(isPublishedStatus("Public")).toBe(true)
+    expect(isPublishedStatus("공개")).toBe(true)
+    expect(isPublishedStatus("발행 완료")).toBe(true)
+    expect(isPublishedStatus("Private")).toBe(false)
+    expect(isPublishedStatus("Draft")).toBe(false)
   })
 
   it("status 미지정 글은 Public 으로 간주한다", () => {

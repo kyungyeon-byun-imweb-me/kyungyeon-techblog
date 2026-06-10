@@ -72,6 +72,10 @@ const CONFIG = {
   analytics: {
     enabled: true,
     measurementId: "G-B33T8S3QZH",
+    defaultEventParams: {
+      deployment_platform: "github-pages",
+      app_framework: "next",
+    },
   },
 
   // ── 댓글 (utterances) ───────────────────────────────────────────────────

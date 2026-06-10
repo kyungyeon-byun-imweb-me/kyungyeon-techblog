@@ -11,7 +11,7 @@ const CONFIG = require("../../../site.config")
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void
-    dataLayer?: unknown[]
+    dataLayer?: Array<Record<string, unknown> | IArguments>
   }
 }
 
@@ -19,6 +19,7 @@ export default function Analytics() {
   const router = useRouter()
   const cfg = CONFIG.analytics
   const enabled = !!cfg?.enabled && !!cfg?.measurementId
+  const defaultEventParams = cfg?.defaultEventParams
 
   useEffect(() => {
     if (!enabled) return
@@ -26,13 +27,14 @@ export default function Analytics() {
       window.gtag?.("event", "page_view", {
         page_path: url,
         page_location: window.location.origin + url,
+        ...(defaultEventParams || {}),
       })
     }
     router.events.on("routeChangeComplete", onRouteChange)
     return () => {
       router.events.off("routeChangeComplete", onRouteChange)
     }
-  }, [enabled, router.events])
+  }, [defaultEventParams, enabled, router.events])
 
   if (!enabled) return null
 
@@ -53,6 +55,9 @@ export default function Analytics() {
           gtag('config', '${id}', {
             anonymize_ip: true,
             send_page_view: true,
+            ${Object.entries(defaultEventParams || {})
+              .map(([key, value]) => `${JSON.stringify(key)}: ${JSON.stringify(value)},`)
+              .join("\n            ")}
           });
         `}
       </Script>

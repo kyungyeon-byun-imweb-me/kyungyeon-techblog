@@ -37,10 +37,6 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -49,9 +45,10 @@ jobs:
           # notion-client(비공식 API)를 사용하므로 NOTION_TOKEN 은 필요 없습니다.
           # 노션 DB 페이지가 "웹에 게시(Share to web)" 되어 있으면 빌드 시 자동으로 가져옵니다.
           GITHUB_PAGES: "true"
-          # 프로젝트 페이지 배포 시 configure-pages 가 basePath 를 계산합니다.
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # 기본 GitHub Pages 프로젝트 URL:
+          # https://kyungyeon-byun-imweb-me.github.io/kyungyeon-techblog
+          BASE_PATH: "/kyungyeon-techblog"
+          NEXT_PUBLIC_BASE_PATH: "/kyungyeon-techblog"
         run: |
           pnpm build
           touch ./out/.nojekyll

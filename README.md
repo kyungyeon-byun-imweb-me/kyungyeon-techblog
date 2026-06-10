@@ -48,4 +48,5 @@ pnpm build
 
 Notion에 새 글을 작성하고 `status = Public`으로 바꾸면 다음 cron 빌드에서 정적 페이지가 새로 생성됩니다.
 
-운영 도메인은 `https://kyungyeon.dev`입니다.
+현재 배포 URL은 `https://kyungyeon-byun-imweb-me.github.io/kyungyeon-techblog`입니다.
+`kyungyeon.dev` 커스텀 도메인을 연결할 때는 `public/CNAME`을 다시 추가하고 GitHub Pages의 Custom domain 설정을 변경합니다.

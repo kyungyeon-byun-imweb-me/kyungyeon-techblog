@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 
 // GitHub Pages 정적 배포 설정
-// - 커스텀 도메인이 붙어 있으면 workflow 의 configure-pages 가 BASE_PATH="" 를 주입합니다.
-//   workflow 의 `configure-pages` 가 그 사실을 감지하고 BASE_PATH 를 ""로 주입합니다.
-// - 프로젝트 페이지 (`<owner>.github.io/<repo>`) 로 떨어지는 경우만 `/kyungyeon-techblog` 폴백.
+// - 기본 GitHub Pages 프로젝트 URL 에서는 `/kyungyeon-techblog` basePath 를 사용합니다.
+// - kyungyeon.dev 커스텀 도메인을 연결하면 workflow 에서 BASE_PATH="" 로 바꾸면 됩니다.
 // - `??` 를 쓰는 이유: `||` 로 두면 빈 문자열도 falsy 라 폴백이 잘못 발동해 자산이 깨집니다.
 const isGithubPages = process.env.GITHUB_PAGES === "true"
 const basePath = isGithubPages ? (process.env.BASE_PATH ?? "/kyungyeon-techblog") : ""

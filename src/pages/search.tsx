@@ -1,6 +1,7 @@
 import type { GetStaticProps, InferGetStaticPropsType } from "next"
 import { useRouter } from "next/router"
 import { useEffect, useMemo, useState } from "react"
+import Seo from "@/components/common/Seo"
 import ModernPostCard from "@/components/home/ModernPostCard"
 import ModernLayout from "@/components/layout/ModernLayout"
 import { getPosts } from "@/lib/notion/getPosts"
@@ -39,6 +40,7 @@ export default function SearchPage({
 
   return (
     <ModernLayout>
+      <Seo title="Search" path="/search/" noindex />
       <div className="modern-blog-layout">
         <section className="hero-section compact">
           <div className="container">

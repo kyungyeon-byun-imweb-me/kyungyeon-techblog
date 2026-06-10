@@ -1,3 +1,4 @@
+import Seo from "@/components/common/Seo"
 import ModernLayout from "@/components/layout/ModernLayout"
 
 const CONFIG = require("../../site.config")
@@ -5,6 +6,7 @@ const CONFIG = require("../../site.config")
 export default function AboutPage() {
   return (
     <ModernLayout>
+      <Seo title="About" path="/about/" />
       <main className="article-container utility-page">
         <header className="article-meta-header">
           <h1 className="article-title">About</h1>

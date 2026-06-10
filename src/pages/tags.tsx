@@ -1,5 +1,6 @@
 import type { GetStaticProps, InferGetStaticPropsType } from "next"
 import Link from "next/link"
+import Seo from "@/components/common/Seo"
 import ModernLayout from "@/components/layout/ModernLayout"
 import { getPosts, getTags } from "@/lib/notion/getPosts"
 import { safeAsync } from "@/lib/utils/safeAsync"
@@ -27,6 +28,7 @@ export default function TagsPage({
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <ModernLayout>
+      <Seo title="Tags" path="/tags/" />
       <main className="article-container utility-page">
         <header className="article-meta-header">
           <h1 className="article-title">Tags</h1>

@@ -1,9 +1,9 @@
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next"
 import dynamic from "next/dynamic"
-import Head from "next/head"
 import Link from "next/link"
 import type { ExtendedRecordMap } from "notion-types"
 import CoverImage from "@/components/common/CoverImage"
+import Seo from "@/components/common/Seo"
 import ModernLayout from "@/components/layout/ModernLayout"
 import Donation from "@/components/post/Donation"
 import PostActions from "@/components/post/PostActions"
@@ -55,18 +55,18 @@ export default function PostPage({
   recordMap,
   relatedPosts,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const pageTitle = `${post.title} | ${CONFIG.blog.title}`
+  const description = post.summary || CONFIG.blog.description
 
   return (
     <ModernLayout>
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={post.summary || CONFIG.blog.description} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={post.summary || CONFIG.blog.description} />
-        {post.cover && <meta property="og:image" content={post.cover} />}
-        <meta property="og:type" content="article" />
-      </Head>
+      <Seo
+        title={post.title}
+        description={description}
+        path={`/posts/${encodeURIComponent(post.slug)}/`}
+        image={post.cover}
+        type="article"
+        post={post}
+      />
 
       <div className="modern-blog-detail">
         <header className="article-header-section">

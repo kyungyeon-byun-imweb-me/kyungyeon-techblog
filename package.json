@@ -6,6 +6,7 @@
   "description": "Eric's DevLog - Notion 기반 정적 기술 블로그",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/check-env.mjs",
     "build": "next build",
     "postbuild": "tsx scripts/build-feed-and-sitemap.ts",
     "start": "next start",

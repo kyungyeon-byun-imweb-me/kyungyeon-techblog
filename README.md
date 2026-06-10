@@ -13,7 +13,15 @@ pnpm run dev
 
 - Notion Integration token은 필요 없습니다.
 - `notion-client` 비공식 public API를 사용하므로 Notion DB 페이지가 `Publish to web` 상태여야 합니다.
-- DB ID는 `site.config.js`의 `notion.databaseId` 또는 `NOTION_DATABASE_ID` 환경변수로 지정합니다.
+- DB ID는 `NOTION_DATABASE_ID` 환경변수로만 지정합니다. 공개 저장소에 DB ID를 커밋하지 않습니다.
+
+로컬에서는 `.env.local`을 만들고 다음 값을 넣습니다.
+
+```bash
+NOTION_DATABASE_ID=your-notion-database-id
+```
+
+GitHub Actions 배포에서는 저장소 `Settings → Secrets and variables → Actions → Repository secrets`에 `NOTION_DATABASE_ID`를 추가합니다.
 
 지원하는 속성명:
 

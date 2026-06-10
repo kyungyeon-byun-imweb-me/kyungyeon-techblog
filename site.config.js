@@ -32,9 +32,8 @@ const CONFIG = {
   // ── Notion 연동 ──────────────────────────────────────────────────────────
   // notion-client (비공식 API). 토큰 불필요. DB 가 "Publish to web" 되어 있어야 함.
   notion: {
-    // Notion 데이터베이스 ID.
-    databaseId:
-      process.env.NOTION_DATABASE_ID || "37b2a0d1-3505-8079-acff-000b1886a9aa",
+    // 공개 저장소에 DB ID 를 남기지 않기 위해 환경변수에서만 읽습니다.
+    databaseId: process.env.NOTION_DATABASE_ID || "",
   },
 
   // ── 네비게이션 ───────────────────────────────────────────────────────────

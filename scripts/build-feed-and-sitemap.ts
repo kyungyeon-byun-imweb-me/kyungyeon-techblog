@@ -4,8 +4,13 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { Feed } from "feed"
-import { getPosts } from "../src/lib/notion/getPosts"
 
+const { loadLocalEnv } = require("./load-env.cjs")
+loadLocalEnv(process.cwd())
+
+const { getPosts } = require("../src/lib/notion/getPosts") as typeof import(
+  "../src/lib/notion/getPosts"
+)
 const CONFIG = require("../site.config")
 
 const OUT_DIR = process.env.OUT_DIR || "out"
@@ -48,7 +53,9 @@ async function buildRss(posts: Awaited<ReturnType<typeof getPosts>>) {
 
   writeFileSync(join(OUT_DIR, "feed.xml"), feed.rss2())
   writeFileSync(join(OUT_DIR, "atom.xml"), feed.atom1())
-  console.log(`✓ feed.xml / atom.xml (${Math.min(posts.length, RSS_ITEM_LIMIT)} items)`)
+  console.log(
+    `✓ feed.xml / atom.xml (${Math.min(posts.length, RSS_ITEM_LIMIT)} items)`
+  )
 }
 
 function buildSitemap(posts: Awaited<ReturnType<typeof getPosts>>) {

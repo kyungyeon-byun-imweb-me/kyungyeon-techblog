@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic"
 import type { CodeBlock, Decoration, ExtendedRecordMap } from "notion-types"
+import { useState } from "react"
 import { NotionRenderer } from "react-notion-x"
 
 const Collection = dynamic(() =>
@@ -43,12 +44,44 @@ function PlainCode({
   const classes = ["notion-code", `language-${language}`, className]
     .filter(Boolean)
     .join(" ")
+  const [copied, setCopied] = useState(false)
+
+  const copy = async () => {
+    if (!content) return
+
+    try {
+      await navigator.clipboard.writeText(content)
+    } catch {
+      const textarea = document.createElement("textarea")
+      textarea.value = content
+      textarea.setAttribute("readonly", "")
+      textarea.style.position = "fixed"
+      textarea.style.opacity = "0"
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand("copy")
+      textarea.remove()
+    }
+
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1500)
+  }
 
   return (
     <>
-      <pre className={classes} tabIndex={0}>
-        <code className={`language-${language}`}>{content}</code>
-      </pre>
+      <div className="notion-code-wrapper gatsby-remark-prismjs-copy-button-container">
+        <button
+          type="button"
+          className="code-copy-button gatsby-remark-prismjs-copy-button"
+          onClick={copy}
+          aria-label="코드 복사"
+        >
+          {copied ? "Copied" : "Copy"}
+        </button>
+        <pre className={classes} tabIndex={0}>
+          <code className={`language-${language}`}>{content}</code>
+        </pre>
+      </div>
       {caption && <figcaption className="notion-asset-caption">{caption}</figcaption>}
     </>
   )

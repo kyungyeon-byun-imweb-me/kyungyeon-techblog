@@ -578,12 +578,52 @@ img {
 
 .article-content pre,
 .article-content .notion-code {
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: #2d3748;
+  color: #e2e8f0;
   padding: 1.5rem;
   border-radius: 0.5rem;
   overflow-x: auto;
   margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.article-content .notion-code-wrapper {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.article-content .notion-code-wrapper .notion-code {
+  margin: 0;
+  padding-right: 5.5rem;
+}
+
+.article-content .code-copy-button {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.1);
+  color: #d4d4d4;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.article-content .code-copy-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.32);
 }
 
 .article-content pre code {
@@ -591,9 +631,11 @@ img {
   padding: 0;
   color: inherit;
   display: block;
-  font-size: 0.875rem;
-  line-height: 1.7;
+  font-size: 0.9rem;
+  line-height: 1.5;
   white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 .article-content img,
@@ -645,9 +687,54 @@ img {
   margin-top: 2rem;
 }
 
-.comments-section h2 {
-  font-size: 1.5rem;
-  margin: 0 0 1.5rem;
+.comments-section #comment {
+  min-height: 220px;
+}
+
+.bmc_wrap {
+  margin-top: 3rem;
+  text-align: right;
+}
+
+.bmc_button {
+  padding: 7px 5px 7px 10px;
+  height: 40px;
+  min-width: 217px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background-color: #ff5f5f;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  font-size: 28px;
+  letter-spacing: 0;
+  box-shadow: 0 1px 2px 2px rgba(190, 190, 190, 0.5);
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  transition:
+    opacity 0.3s,
+    box-shadow 0.3s;
+}
+
+.bmc_button img {
+  width: 20px;
+  box-shadow: none;
+  border: none;
+  vertical-align: middle;
+}
+
+.bmc_button span {
+  margin-left: 5px;
+  font-size: 15px;
+}
+
+.bmc_button:hover {
+  text-decoration: none;
+  box-shadow: 0 1px 2px 2px rgba(190, 190, 190, 0.5);
+  opacity: 0.85;
+  color: #ffffff;
 }
 
 .article-actions-bar {
@@ -677,6 +764,88 @@ img {
   background: var(--modern-muted);
 }
 
+.related-posts-section h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--modern-foreground);
+  margin: 0 0 1.5rem;
+  letter-spacing: 0;
+}
+
+.related-posts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.related-post-card {
+  background: var(--modern-card-bg);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+  text-decoration: none;
+  display: block;
+  min-width: 0;
+}
+
+.related-post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.related-post-card:hover h4 {
+  color: var(--modern-primary);
+}
+
+.related-post-card:hover .related-post-image img {
+  transform: scale(1.05);
+}
+
+.related-post-image {
+  height: 8rem;
+  overflow: hidden;
+}
+
+.related-post-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.related-post-content {
+  padding: 1rem;
+}
+
+.related-post-content h4 {
+  font-weight: 600;
+  color: var(--modern-foreground);
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  transition: color 0.2s;
+  letter-spacing: 0;
+}
+
+.related-post-content p {
+  color: var(--modern-muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0 0 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.related-post-content .read-time {
+  color: var(--modern-muted-foreground);
+  font-size: 0.75rem;
+}
+
 .utility-page {
   min-height: 60vh;
 }
@@ -697,6 +866,10 @@ img {
 
   .posts-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .related-posts-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .article-title {

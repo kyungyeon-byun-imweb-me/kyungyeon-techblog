@@ -5,8 +5,10 @@ import Link from "next/link"
 import type { ExtendedRecordMap } from "notion-types"
 import CoverImage from "@/components/common/CoverImage"
 import ModernLayout from "@/components/layout/ModernLayout"
+import Donation from "@/components/post/Donation"
 import PostActions from "@/components/post/PostActions"
 import PostContent from "@/components/post/PostContent"
+import RelatedPosts from "@/components/post/RelatedPosts"
 import { getPostBySlug } from "@/lib/notion/getPostBySlug"
 import { getPosts } from "@/lib/notion/getPosts"
 import { formatDateShort } from "@/lib/utils/formatDate"
@@ -22,6 +24,7 @@ const Comments = dynamic(() => import("@/components/post/Comments"), {
 type Props = {
   post: TPost
   recordMap: ExtendedRecordMap
+  relatedPosts: TPost[]
 }
 
 const estimateReadTime = (post: TPost) => {
@@ -42,12 +45,15 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const result = await getPostBySlug(slug)
   if (!result) return { notFound: true }
   const { recordMap, ...post } = result
-  return { props: { post, recordMap } }
+  const posts = await getPosts()
+  const relatedPosts = posts.filter((item) => item.id !== post.id).slice(0, 3)
+  return { props: { post, recordMap, relatedPosts } }
 }
 
 export default function PostPage({
   post,
   recordMap,
+  relatedPosts,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const pageTitle = `${post.title} | ${CONFIG.blog.title}`
 
@@ -127,7 +133,11 @@ export default function PostPage({
 
           <PostContent recordMap={recordMap} />
           <PostActions post={post} />
+          <Donation />
           <Comments />
+          <footer className="article-footer">
+            <RelatedPosts posts={relatedPosts} />
+          </footer>
         </article>
       </div>
     </ModernLayout>

@@ -74,22 +74,15 @@ const CONFIG = {
     measurementId: "G-B33T8S3QZH",
   },
 
-  // ── 댓글 (giscus) ───────────────────────────────────────────────────────
-  // 1) 레포 Settings → General → Features → Discussions 활성화
-  // 2) https://github.com/apps/giscus 설치 (해당 레포에 접근 권한 부여)
-  // 3) https://giscus.app 에서 설정 마법사로 repoId / categoryId 받기
-  // 4) 아래 값 채우고 enabled: true 로 변경
+  // ── 댓글 (utterances) ───────────────────────────────────────────────────
+  // gatsby_blog 와 동일하게 GitHub issue 기반 댓글을 사용합니다.
   comments: {
-    giscus: {
+    utterances: {
       enabled: true,
-      repo: "",
-      repoId: "",
-      category: "General",
-      categoryId: "",
-      mapping: "pathname", // 페이지 경로를 discussion 과 매핑
-      lang: "ko",
-      reactionsEnabled: "1",
-      inputPosition: "bottom",
+      repo: "kyung-yeon-io/gatsby_blog_comment",
+      branch: "master",
+      issueTerm: "url",
+      theme: "github-light",
     },
   },
 

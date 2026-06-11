@@ -1,6 +1,6 @@
 // 공통 타입 정의. 화면에서 다루는 가공된 글 데이터는 TPost 입니다.
 
-export type TPostStatus = "Public" | "공개" | "발행 완료" | "Private" | "Draft"
+export type TPostStatus = "작성중" | "발행 완료"
 
 export type TAuthor = {
   name: string

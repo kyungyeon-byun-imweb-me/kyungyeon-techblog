@@ -43,7 +43,7 @@ describe("mapBlockToPost", () => {
       {
         id: "1",
         title: "테스트 글",
-        status: "Public",
+        status: "발행 완료",
         category: ["Engineering"],
         tags: ["React", "TypeScript"],
         summary: "요약입니다",
@@ -58,14 +58,14 @@ describe("mapBlockToPost", () => {
       category: ["Engineering"],
       tags: ["React", "TypeScript"],
       date: "2026-05-13",
-      status: "Public",
+      status: "발행 완료",
     })
     expect(post.authors).toEqual([])
   })
 
   it("postNo 가 있으면 숫자 URL slug 로 우선 사용한다", () => {
     const { block, recordMap } = blockOf("1", [
-      { id: "1", title: "Hello World", postNo: 42, status: "Public" },
+      { id: "1", title: "Hello World", postNo: 42, status: "발행 완료" },
     ])
     const post = mapBlockToPost(block, SCHEMA, recordMap)
     expect(post.postNo).toBe("42")
@@ -74,10 +74,10 @@ describe("mapBlockToPost", () => {
 
   it("postNo 의 콤마와 정수형 소수 표기를 URL 용 숫자로 정규화한다", () => {
     const comma = blockOf("1", [
-      { id: "1", title: "A", postNo: "1,000", status: "Public" },
+      { id: "1", title: "A", postNo: "1,000", status: "발행 완료" },
     ])
     const decimal = blockOf("2", [
-      { id: "2", title: "B", postNo: "1000.0", status: "Public" },
+      { id: "2", title: "B", postNo: "1000.0", status: "발행 완료" },
     ])
 
     expect(mapBlockToPost(comma.block, SCHEMA, comma.recordMap).slug).toBe(
@@ -90,7 +90,7 @@ describe("mapBlockToPost", () => {
 
   it("slug 가 비면 title 로부터 생성한다", () => {
     const { block, recordMap } = blockOf("1", [
-      { id: "1", title: "Hello World", status: "Public" },
+      { id: "1", title: "Hello World", status: "발행 완료" },
     ])
     const post = mapBlockToPost(block, SCHEMA, recordMap)
     expect(post.postNo).toBeNull()
@@ -102,7 +102,7 @@ describe("mapBlockToPost", () => {
       {
         id: "1",
         title: "썸네일 글",
-        status: "Public",
+        status: "발행 완료",
         thumbnail: "attachment:abc-123:image.png",
       },
     ])
@@ -115,7 +115,7 @@ describe("mapBlockToPost", () => {
 
   it("title 도 slug 도 없으면 block id 를 slug 로 쓴다", () => {
     const { block, recordMap } = blockOf("blk-123", [
-      { id: "blk-123", title: "", status: "Public" },
+      { id: "blk-123", title: "", status: "발행 완료" },
     ])
     const post = mapBlockToPost(block, SCHEMA, recordMap)
     expect(post.slug).toBe("blk-123")
@@ -123,21 +123,21 @@ describe("mapBlockToPost", () => {
 
   it("date 미지정 시 created_time 으로 채운다", () => {
     const { block, recordMap } = blockOf("1", [
-      { id: "1", title: "날짜없음", status: "Public" },
+      { id: "1", title: "날짜없음", status: "발행 완료" },
     ])
     const post = mapBlockToPost(block, SCHEMA, recordMap)
     expect(post.date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 
-  it("status 미지정 시 Public 으로 기본 처리한다", () => {
+  it("status 미지정 시 작성중으로 기본 처리한다", () => {
     const { block, recordMap } = blockOf("1", [{ id: "1", title: "글" }])
     const post = mapBlockToPost(block, SCHEMA, recordMap)
-    expect(post.status).toBe("Public")
+    expect(post.status).toBe("작성중")
   })
 
   it("tags 미지정 시 빈 배열", () => {
     const { block, recordMap } = blockOf("1", [
-      { id: "1", title: "글", status: "Public" },
+      { id: "1", title: "글", status: "발행 완료" },
     ])
     const post = mapBlockToPost(block, SCHEMA, recordMap)
     expect(post.tags).toEqual([])

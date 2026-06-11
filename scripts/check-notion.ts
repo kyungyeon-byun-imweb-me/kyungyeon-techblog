@@ -11,14 +11,20 @@ async function main() {
     process.exit(1)
   }
 
-  const { getPosts } = require("../src/lib/notion/getPosts") as typeof import(
+  const {
+    getPosts,
+    shouldIncludeUnpublishedPosts,
+  } = require(
     "../src/lib/notion/getPosts"
-  )
+  ) as typeof import("../src/lib/notion/getPosts")
 
   try {
     const posts = await getPosts()
+    const includeUnpublished = shouldIncludeUnpublishedPosts()
     console.log(`[notion] source id: ${sourceId}`)
-    console.log(`[notion] published posts: ${posts.length}`)
+    console.log(
+      `[notion] ${includeUnpublished ? "local posts" : "published posts"}: ${posts.length}`
+    )
     for (const post of posts) {
       const postNo = post.postNo ? `postNo=${post.postNo}` : "postNo=-"
       const cover = post.cover ? "cover=yes" : "cover=no"

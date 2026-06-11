@@ -56,10 +56,17 @@ type Collection = {
   ids: string[]
 }
 
-const PUBLISHED_STATUSES = new Set(["Public", "공개", "발행 완료"])
+const PUBLISHED_STATUSES = new Set(["발행 완료"])
 
 export const isPublishedStatus = (status: string): boolean =>
   PUBLISHED_STATUSES.has(status)
+
+type SnapshotOptions = {
+  includeUnpublished?: boolean
+}
+
+export const shouldIncludeUnpublishedPosts = (): boolean =>
+  process.env.NOTION_INCLUDE_UNPUBLISHED === "true"
 
 const postNoSortValue = (postNo: string | null): number | null => {
   if (!postNo) return null
@@ -102,11 +109,13 @@ export const extractCollection = (
 // recordMap → DbSnapshot 순수 변환. 작성자 보강(enrich)은 호출 전에 끝나 있어야 함.
 // 네트워크 I/O 가 없으므로 fixture 만으로 단위 테스트 가능.
 export const snapshotFromRecordMap = (
-  recordMap: ExtendedRecordMap
+  recordMap: ExtendedRecordMap,
+  options: SnapshotOptions = {}
 ): DbSnapshot => {
   const coll = extractCollection(recordMap)
   if (!coll) return { posts: [], categories: [], tags: [] }
   const { schema, ids } = coll
+  const includeUnpublished = options.includeUnpublished === true
 
   // ── posts ─────────────────────────────────────────────────────────────
   const allPosts: TPost[] = []
@@ -116,7 +125,7 @@ export const snapshotFromRecordMap = (
     allPosts.push(mapBlockToPost(block, schema, recordMap))
   }
   const posts = allPosts
-    .filter((p) => isPublishedStatus(p.status))
+    .filter((p) => includeUnpublished || isPublishedStatus(p.status))
     .sort(comparePosts)
 
   // ── categories: 스키마 정의 순서로 고정, 0건 카테고리도 노출 ──────────
@@ -160,7 +169,9 @@ const buildSnapshot = async (): Promise<DbSnapshot> => {
     }
   }
 
-  return snapshotFromRecordMap(recordMap)
+  return snapshotFromRecordMap(recordMap, {
+    includeUnpublished: shouldIncludeUnpublishedPosts(),
+  })
 }
 
 // 단일 진입점. 첫 호출만 실제 fetch/변환하고 이후엔 메모이즈된 Promise 반환.

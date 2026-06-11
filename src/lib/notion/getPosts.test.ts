@@ -27,8 +27,8 @@ describe("extractBlockIds", () => {
 describe("extractCollection", () => {
   it("schema 와 행 id 목록을 추출한다", () => {
     const rm = buildRecordMap([
-      { id: "1", title: "A", status: "Public" },
-      { id: "2", title: "B", status: "Public" },
+      { id: "1", title: "A", status: "발행 완료" },
+      { id: "2", title: "B", status: "발행 완료" },
     ])
     const coll = extractCollection(rm)
     expect(coll).not.toBeNull()
@@ -42,41 +42,43 @@ describe("extractCollection", () => {
 })
 
 describe("snapshotFromRecordMap", () => {
-  it("게시 상태 글만 노출하고 PublicOnDetail/Draft 등은 제외한다", () => {
+  it("발행 완료 상태 글만 노출하고 작성중 글은 제외한다", () => {
     const rm = buildRecordMap([
-      { id: "1", title: "공개글", status: "Public" },
-      { id: "2", title: "상세전용", status: "PublicOnDetail" },
-      { id: "3", title: "초안", status: "Draft" },
-      { id: "4", title: "한글공개", status: "공개" },
-      { id: "5", title: "발행완료", status: "발행 완료" },
+      { id: "1", title: "발행완료", status: "발행 완료" },
+      { id: "2", title: "작성중", status: "작성중" },
     ])
     const { posts } = snapshotFromRecordMap(rm)
-    expect(posts.map((p) => p.title).sort()).toEqual([
-      "공개글",
-      "발행완료",
-      "한글공개",
-    ])
+    expect(posts.map((p) => p.title)).toEqual(["발행완료"])
   })
 
-  it("게시 상태 alias 를 판별한다", () => {
-    expect(isPublishedStatus("Public")).toBe(true)
-    expect(isPublishedStatus("공개")).toBe(true)
+  it("발행 완료 상태만 게시 상태로 판별한다", () => {
     expect(isPublishedStatus("발행 완료")).toBe(true)
-    expect(isPublishedStatus("Private")).toBe(false)
-    expect(isPublishedStatus("Draft")).toBe(false)
+    expect(isPublishedStatus("작성중")).toBe(false)
   })
 
-  it("status 미지정 글은 Public 으로 간주한다", () => {
+  it("로컬 확인 옵션이 켜지면 미발행 상태 글도 포함한다", () => {
+    const rm = buildRecordMap([
+      { id: "1", title: "발행완료", status: "발행 완료", postNo: 2 },
+      { id: "2", title: "작성중", status: "작성중", postNo: 1 },
+    ])
+    const { posts } = snapshotFromRecordMap(rm, { includeUnpublished: true })
+    expect(posts.map((p) => p.title)).toEqual(["발행완료", "작성중"])
+  })
+
+  it("status 미지정 글은 작성중으로 간주해 기본 목록에서 제외한다", () => {
     const rm = buildRecordMap([{ id: "1", title: "상태없음" }])
     const { posts } = snapshotFromRecordMap(rm)
-    expect(posts).toHaveLength(1)
-    expect(posts[0].status).toBe("Public")
+    expect(posts).toHaveLength(0)
+
+    const local = snapshotFromRecordMap(rm, { includeUnpublished: true })
+    expect(local.posts).toHaveLength(1)
+    expect(local.posts[0].status).toBe("작성중")
   })
 
   it("page 타입이 아닌 블록은 무시한다", () => {
     const rm = buildRecordMap([
-      { id: "1", title: "글", status: "Public" },
-      { id: "2", title: "잡블록", status: "Public", type: "text" },
+      { id: "1", title: "글", status: "발행 완료" },
+      { id: "2", title: "잡블록", status: "발행 완료", type: "text" },
     ])
     const { posts } = snapshotFromRecordMap(rm)
     expect(posts).toHaveLength(1)
@@ -88,21 +90,21 @@ describe("snapshotFromRecordMap", () => {
       {
         id: "1",
         title: "postNo 1",
-        status: "Public",
+        status: "발행 완료",
         postNo: 1,
         date: "2026-05-20",
       },
       {
         id: "2",
         title: "postNo 3",
-        status: "Public",
+        status: "발행 완료",
         postNo: 3,
         date: "2026-01-10",
       },
       {
         id: "3",
         title: "postNo 2",
-        status: "Public",
+        status: "발행 완료",
         postNo: 2,
         date: "2026-03-15",
       },
@@ -117,9 +119,9 @@ describe("snapshotFromRecordMap", () => {
 
   it("postNo 가 없으면 발행일 내림차순으로 정렬한다", () => {
     const rm = buildRecordMap([
-      { id: "1", title: "오래된글", status: "Public", date: "2026-01-10" },
-      { id: "2", title: "최신글", status: "Public", date: "2026-05-20" },
-      { id: "3", title: "중간글", status: "Public", date: "2026-03-15" },
+      { id: "1", title: "오래된글", status: "발행 완료", date: "2026-01-10" },
+      { id: "2", title: "최신글", status: "발행 완료", date: "2026-05-20" },
+      { id: "3", title: "중간글", status: "발행 완료", date: "2026-03-15" },
     ])
     const { posts } = snapshotFromRecordMap(rm)
     expect(posts.map((p) => p.title)).toEqual(["최신글", "중간글", "오래된글"])
@@ -127,9 +129,9 @@ describe("snapshotFromRecordMap", () => {
 
   it("카테고리는 스키마 정의 순서를 유지하고 0건도 노출한다 (multi-select)", () => {
     const rm = buildRecordMap([
-      { id: "1", title: "a", status: "Public", category: ["Design"] },
-      { id: "2", title: "b", status: "Public", category: ["Engineering"] },
-      { id: "3", title: "c", status: "Public", category: ["Engineering", "Design"] },
+      { id: "1", title: "a", status: "발행 완료", category: ["Design"] },
+      { id: "2", title: "b", status: "발행 완료", category: ["Engineering"] },
+      { id: "3", title: "c", status: "발행 완료", category: ["Engineering", "Design"] },
     ])
     const { categories } = snapshotFromRecordMap(rm)
     // 스키마 순서: Engineering, Design, Culture (Culture 는 0건). 한 글이 여러 카테고리에 속하면 각각 카운트.
@@ -142,10 +144,10 @@ describe("snapshotFromRecordMap", () => {
 
   it("태그는 사용 빈도 내림차순으로 집계한다", () => {
     const rm = buildRecordMap([
-      { id: "1", title: "a", status: "Public", tags: ["React", "TypeScript"] },
-      { id: "2", title: "b", status: "Public", tags: ["React"] },
-      { id: "3", title: "c", status: "Public", tags: ["React", "TypeScript"] },
-      { id: "4", title: "d", status: "Public", tags: ["CSS"] },
+      { id: "1", title: "a", status: "발행 완료", tags: ["React", "TypeScript"] },
+      { id: "2", title: "b", status: "발행 완료", tags: ["React"] },
+      { id: "3", title: "c", status: "발행 완료", tags: ["React", "TypeScript"] },
+      { id: "4", title: "d", status: "발행 완료", tags: ["CSS"] },
     ])
     const { tags } = snapshotFromRecordMap(rm)
     expect(tags[0]).toEqual({ name: "React", count: 3 })
@@ -155,7 +157,7 @@ describe("snapshotFromRecordMap", () => {
 
   it("신형 collection_group_results 응답에서도 동일하게 동작한다", () => {
     const rm = buildRecordMap(
-      [{ id: "1", title: "글", status: "Public" }],
+      [{ id: "1", title: "글", status: "발행 완료" }],
       { useGroupResults: true }
     )
     const { posts } = snapshotFromRecordMap(rm)
@@ -166,7 +168,7 @@ describe("snapshotFromRecordMap", () => {
     const many = Array.from({ length: 200 }, (_, i) => ({
       id: `post-${i}`,
       title: `글 ${i}`,
-      status: "Public",
+      status: "발행 완료",
       date: `2026-01-${String((i % 28) + 1).padStart(2, "0")}`,
     }))
     const { posts } = snapshotFromRecordMap(buildRecordMap(many))

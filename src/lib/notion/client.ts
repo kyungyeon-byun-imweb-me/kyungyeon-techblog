@@ -46,6 +46,8 @@ const NOTION_REQUEST_INTERVAL_MS = Number(
   process.env.NOTION_REQUEST_INTERVAL_MS || 1500
 )
 const NOTION_MAX_ATTEMPTS = Number(process.env.NOTION_MAX_ATTEMPTS || 6)
+const NOTION_BYPASS_DISK_CACHE =
+  process.env.NOTION_BYPASS_DISK_CACHE === "true"
 
 const diskCachePath = (key: string) =>
   path.join(DISK_CACHE_DIR, `${createHash("sha1").update(key).digest("hex")}.json`)
@@ -58,6 +60,13 @@ const readDiskPageCache = async (
   } catch {
     return null
   }
+}
+
+const readUsableDiskPageCache = async (
+  key: string
+): Promise<ExtendedRecordMap | null> => {
+  if (NOTION_BYPASS_DISK_CACHE) return null
+  return readDiskPageCache(key)
 }
 
 const writeDiskPageCache = async (
@@ -131,12 +140,12 @@ const withNetworkLock = async <T>(fn: () => Promise<T>): Promise<T> => {
 
 const getPageWithRetry = async (key: string): Promise<ExtendedRecordMap> => {
   for (let attempt = 0; attempt < NOTION_MAX_ATTEMPTS; attempt += 1) {
-    const cached = await readDiskPageCache(key)
+    const cached = await readUsableDiskPageCache(key)
     if (cached) return cached
 
     try {
       return await withNetworkLock(async () => {
-        const lockedCached = await readDiskPageCache(key)
+        const lockedCached = await readUsableDiskPageCache(key)
         if (lockedCached) return lockedCached
         return notion.getPage(key, DEFAULT_FETCH_OPTIONS as any)
       })
@@ -203,7 +212,7 @@ export const fetchPage = (pageId: string): Promise<ExtendedRecordMap> => {
     cached.errorAt &&
     Date.now() - cached.errorAt < ERROR_COOLDOWN_MS
   ) {
-    return readDiskPageCache(key).then((recordMap) => {
+    return readUsableDiskPageCache(key).then((recordMap) => {
       if (recordMap) {
         notionCache.pages.set(key, {
           promise: Promise.resolve(recordMap),
@@ -215,7 +224,7 @@ export const fetchPage = (pageId: string): Promise<ExtendedRecordMap> => {
     })
   }
 
-  const promise = readDiskPageCache(key)
+  const promise = readUsableDiskPageCache(key)
     .then((diskRecordMap) => diskRecordMap || getPageWithRetry(key))
     .then((recordMap) => {
       void writeDiskPageCache(key, recordMap)
@@ -226,7 +235,7 @@ export const fetchPage = (pageId: string): Promise<ExtendedRecordMap> => {
       return recordMap
     })
     .catch(async (error) => {
-      const recordMap = await readDiskPageCache(key)
+      const recordMap = await readUsableDiskPageCache(key)
       if (recordMap) {
         notionCache.pages.set(key, {
           promise: Promise.resolve(recordMap),

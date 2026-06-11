@@ -9,6 +9,13 @@ pnpm install
 pnpm run dev
 ```
 
+Notion 글 목록을 확인할 때는 아래 스크립트를 사용합니다.
+
+```bash
+pnpm run notion:publish       # 공개 상태 글만 확인
+pnpm run notion:publish:local # 미발행/작성중 글까지 로컬에서 확인
+```
+
 ## Notion CMS
 
 - Notion Integration token은 필요 없습니다.
@@ -31,7 +38,7 @@ GitHub Actions 배포에서는 저장소 `Settings → Secrets and variables →
 | `title` | Title | 필수 | 글 제목 |
 | `postNo` | Number/Text | `postNo`, `post_no`, `post no`, `post number`, `번호` | 있으면 URL이 `/posts/{postNo}/`가 됨 |
 | `slug` | Text | `slug`, `url` | `postNo`가 비어 있으면 slug, title 순서로 생성 |
-| `status` | Select | `status`, `상태` | `Public`, `공개`, `발행 완료`만 노출 |
+| `status` | Select | `status`, `상태` | `발행 완료`만 노출. `pnpm run notion:publish:local`에서는 `작성중` 글도 확인 |
 | `category` | Multi-select | `category`, `카테고리` | 홈 카테고리 필터 |
 | `tags` | Multi-select | `tags`, `태그` | 검색/상세 태그 |
 | `summary` | Text | `summary`, `description`, `요약` | 카드/SEO 설명 |

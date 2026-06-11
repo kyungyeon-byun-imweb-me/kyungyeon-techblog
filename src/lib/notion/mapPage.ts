@@ -188,7 +188,7 @@ export const mapBlockToPost = (
 ): TPost => {
   const title = richToText(block.properties?.title)
   const status = (pickSelect(block, schema, ["status", "상태"]) ||
-    "Public") as TPostStatus
+    "작성중") as TPostStatus
 
   const postNo = normalizePostNo(
     pickText(block, schema, [

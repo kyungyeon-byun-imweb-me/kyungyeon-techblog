@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1426" />
+      <stop offset="50%" stop-color="#1c2d4a" />
+      <stop offset="100%" stop-color="#30628a" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5ce1e6" />
+      <stop offset="100%" stop-color="#00b3c4" />
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7af5ff" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.15" />
+    </linearGradient>
+    <clipPath id="pad">
+      <rect x="60" y="60" width="1080" height="510" rx="36" ry="36" />
+    </clipPath>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <g clip-path="url(#pad)" opacity="0.7">
+    <circle cx="1040" cy="120" r="180" fill="url(#ring)" />
+    <circle cx="220" cy="420" r="220" fill="url(#ring)" />
+    <circle cx="640" cy="240" r="160" fill="url(#ring)" />
+    <rect x="-120" y="360" width="560" height="560" rx="120" fill="url(#ring)" transform="rotate(-20 160 640)" />
+  </g>
+  <g transform="translate(140 180)">
+    <rect x="0" y="0" width="240" height="240" rx="36" ry="36" fill="#111b30" opacity="0.65" />
+    <rect x="30" y="30" width="180" height="180" rx="30" ry="30" fill="url(#accent)" opacity="0.3" />
+    <path d="M120 80c-33 0-60 27-60 60s27 60 60 60 60-27 60-60-27-60-60-60zm26 61h-21v21h-10v-21H94v-10h21V94h10v21h21z" fill="#9ef2ff" opacity="0.85" />
+    <circle cx="120" cy="120" r="86" stroke="#9ef2ff" stroke-width="4" fill="none" opacity="0.4" />
+  </g>
+  <g transform="translate(420 210)">
+    <text x="0" y="0" fill="#f4fcff" font-size="78" font-family="'Pretendard','Spoqa Han Sans','Noto Sans KR','Segoe UI',sans-serif" font-weight="700">JWT Essentials</text>
+    <text x="0" y="82" fill="#9dd0ff" font-size="32" font-family="'Pretendard','Spoqa Han Sans','Noto Sans KR','Segoe UI',sans-serif">토큰 구조 · 보안 전략 · 운영 모범사례</text>
+  </g>
+  <g transform="translate(420 350)">
+    <text x="0" y="0" fill="#c7e7ff" font-size="26" font-family="'Pretendard','Spoqa Han Sans','Noto Sans KR','Segoe UI',sans-serif">JSON Web Token을 이해하고 현업에 적용하는 핵심 포인트</text>
+  </g>
+  <g transform="translate(420 460)">
+    <text x="0" y="0" fill="#73d7ff" font-size="22" font-family="'Pretendard','Spoqa Han Sans','Noto Sans KR','Segoe UI',sans-serif" letter-spacing="0.12em">HEADER · PAYLOAD · SIGNATURE</text>
+  </g>
+  <g transform="translate(940 540)">
+    <rect x="-220" y="-54" width="220" height="54" rx="12" ry="12" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.12)" />
+    <text x="-196" y="-18" fill="#e4f7ff" font-size="22" font-family="'Roboto Mono','Fira Code','Cascadia Code',monospace">iss · aud · exp · scope</text>
+  </g>
+</svg>

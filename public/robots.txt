@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://kyungyeon-byun-imweb-me.github.io/kyungyeon-techblog/sitemap.xml
+Sitemap: https://kyungyeon.dev/sitemap.xml

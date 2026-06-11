@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "notion:publish": "NOTION_BYPASS_DISK_CACHE=true tsx scripts/check-notion.ts",
-    "notion:publish:local": "NOTION_BYPASS_DISK_CACHE=true NOTION_INCLUDE_UNPUBLISHED=true tsx scripts/check-notion.ts",
+    "notion:publish:local": "NOTION_BYPASS_DISK_CACHE=true NOTION_INCLUDE_UNPUBLISHED=true next dev",
     "prebuild": "node scripts/check-env.mjs",
     "build": "next build",
     "postbuild": "tsx scripts/build-feed-and-sitemap.ts",

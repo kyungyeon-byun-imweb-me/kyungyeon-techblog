@@ -9,11 +9,11 @@ pnpm install
 pnpm run dev
 ```
 
-Notion 글 목록을 확인할 때는 아래 스크립트를 사용합니다.
+Notion 글 목록과 로컬 미리보기는 아래 스크립트를 사용합니다.
 
 ```bash
 pnpm run notion:publish       # 공개 상태 글만 확인
-pnpm run notion:publish:local # 미발행/작성중 글까지 로컬에서 확인
+pnpm run notion:publish:local # 작성중 글까지 포함해 http://localhost:3000 실행
 ```
 
 ## Notion CMS
@@ -38,7 +38,7 @@ GitHub Actions 배포에서는 저장소 `Settings → Secrets and variables →
 | `title` | Title | 필수 | 글 제목 |
 | `postNo` | Number/Text | `postNo`, `post_no`, `post no`, `post number`, `번호` | 있으면 URL이 `/posts/{postNo}/`가 됨 |
 | `slug` | Text | `slug`, `url` | `postNo`가 비어 있으면 slug, title 순서로 생성 |
-| `status` | Select | `status`, `상태` | `발행 완료`만 노출. `pnpm run notion:publish:local`에서는 `작성중` 글도 확인 |
+| `status` | Select | `status`, `상태` | `발행 완료`만 노출. `pnpm run notion:publish:local`에서는 `작성중` 글도 로컬 미리보기 가능 |
 | `category` | Multi-select | `category`, `카테고리` | 홈 카테고리 필터 |
 | `tags` | Multi-select | `tags`, `태그` | 검색/상세 태그 |
 | `summary` | Text | `summary`, `description`, `요약` | 카드/SEO 설명 |
@@ -67,5 +67,5 @@ pnpm build
 
 Notion에 새 글을 작성하고 `status = 발행 완료`로 바꾸면 다음 cron 빌드에서 정적 페이지가 새로 생성됩니다.
 
-현재 배포 URL은 `https://kyungyeon-byun-imweb-me.github.io/kyungyeon-techblog`입니다.
-`kyungyeon.dev` 커스텀 도메인을 연결할 때는 `public/CNAME`을 다시 추가하고 GitHub Pages의 Custom domain 설정을 변경합니다.
+대표 도메인은 `https://kyungyeon.dev`입니다. `public/CNAME`에도 같은 도메인을 설정해두었습니다.
+실제 연결 시 GitHub Pages의 Custom domain과 DNS를 별도로 설정합니다.

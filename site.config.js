@@ -14,8 +14,7 @@ const CONFIG = {
     author: "변경연",
     language: "ko-KR",
     timezone: "Asia/Seoul",
-    siteUrl:
-      "https://kyungyeon-byun-imweb-me.github.io/kyungyeon-techblog",
+    siteUrl: "https://kyungyeon.dev",
   },
 
   // ── 브랜드 컬러 ─────────────────────────────────────────────────────────
@@ -50,7 +49,7 @@ const CONFIG = {
 
   // ── 외부 링크 / 푸터 ────────────────────────────────────────────────────
   social: {
-    homepage: "https://kyungyeon-byun-imweb-me.github.io/kyungyeon-techblog",
+    homepage: "https://kyungyeon.dev",
     careers: "",
     contactEmail: "kissob4905@gmail.com",
   },

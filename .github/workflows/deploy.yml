@@ -47,10 +47,9 @@ jobs:
           NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           GITHUB_PAGES: "true"
-          # 기본 GitHub Pages 프로젝트 URL:
-          # https://kyungyeon-byun-imweb-me.github.io/kyungyeon-techblog
-          BASE_PATH: "/kyungyeon-techblog"
-          NEXT_PUBLIC_BASE_PATH: "/kyungyeon-techblog"
+          # kyungyeon.dev 커스텀 도메인에서는 루트 경로로 배포합니다.
+          BASE_PATH: ""
+          NEXT_PUBLIC_BASE_PATH: ""
         run: |
           pnpm build
           touch ./out/.nojekyll

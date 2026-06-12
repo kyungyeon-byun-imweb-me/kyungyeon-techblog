@@ -43,7 +43,6 @@ const CONFIG = {
   // external: true 면 새 탭으로 엽니다(외부 URL).
   nav: [
     { label: "글", href: "/" },
-    { label: "태그", href: "/tags" },
     { label: "소개", href: "/about" },
   ],
 

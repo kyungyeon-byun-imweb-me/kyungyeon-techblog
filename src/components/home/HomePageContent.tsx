@@ -1,13 +1,13 @@
 import { useRouter } from "next/router"
 import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import ModernLayout from "@/components/layout/ModernLayout"
 import ModernPostCard from "@/components/home/ModernPostCard"
 import HomePagination from "@/components/home/HomePagination"
 import type { TPost } from "@/types"
 
-export const FEATURED_POST_COUNT = 2
 export const POSTS_PER_PAGE = 12
-export const FIRST_PAGE_SIZE = FEATURED_POST_COUNT + POSTS_PER_PAGE
+const ALL_CATEGORY = "All"
 
 type CategorySummary = {
   name: string
@@ -22,16 +22,11 @@ type HomePageContentProps = {
 }
 
 export const getTotalHomePages = (postCount: number): number => {
-  if (postCount <= FIRST_PAGE_SIZE) return 1
-  return 1 + Math.ceil((postCount - FIRST_PAGE_SIZE) / POSTS_PER_PAGE)
+  return Math.max(1, Math.ceil(postCount / POSTS_PER_PAGE))
 }
 
 const getDefaultPagePosts = (posts: TPost[], currentPage: number): TPost[] => {
-  if (currentPage === 1) {
-    return posts.slice(FEATURED_POST_COUNT, FIRST_PAGE_SIZE)
-  }
-
-  const start = FIRST_PAGE_SIZE + (currentPage - 2) * POSTS_PER_PAGE
+  const start = (currentPage - 1) * POSTS_PER_PAGE
   return posts.slice(start, start + POSTS_PER_PAGE)
 }
 
@@ -42,38 +37,86 @@ export default function HomePageContent({
   totalPages,
 }: HomePageContentProps) {
   const router = useRouter()
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [searchQuery, setSearchQuery] = useState(
+  const [selectedCategory, setSelectedCategory] = useState(
+    typeof router.query.category === "string" ? router.query.category : ALL_CATEGORY
+  )
+  const [selectedTag, setSelectedTag] = useState(
     typeof router.query.tag === "string" ? router.query.tag : ""
   )
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     if (!router.isReady) return
-    if (typeof router.query.tag === "string") setSearchQuery(router.query.tag)
-  }, [router.isReady, router.query.tag])
+    setSelectedCategory(
+      typeof router.query.category === "string"
+        ? router.query.category
+        : ALL_CATEGORY
+    )
+    setSelectedTag(typeof router.query.tag === "string" ? router.query.tag : "")
+  }, [router.isReady, router.query.category, router.query.tag])
 
-  const categoryNames = useMemo(
-    () => ["All", ...categories.filter((c) => c.count > 0).map((c) => c.name)],
-    [categories]
+  const sidebarCategories = useMemo(
+    () => {
+      const visibleCategories = categories
+        .filter((category) => category.count > 0)
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+        .slice(0, 10)
+      const maxCategoryCount = Math.max(
+        1,
+        ...visibleCategories.map((category) => category.count)
+      )
+
+      return [
+        { name: ALL_CATEGORY, count: posts.length, ratio: 100 },
+        ...visibleCategories.map((category) => ({
+          ...category,
+          ratio: Math.max(8, Math.round((category.count / maxCategoryCount) * 100)),
+        })),
+      ]
+    },
+    [categories, posts.length]
   )
+
+  const lensPosts = useMemo(() => {
+    if (selectedCategory === ALL_CATEGORY) return posts
+    return posts.filter((post) => post.category.includes(selectedCategory))
+  }, [posts, selectedCategory])
+
+  const relatedTags = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const post of lensPosts) {
+      for (const tag of post.tags) counts.set(tag, (counts.get(tag) || 0) + 1)
+    }
+
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+      .slice(0, 10)
+  }, [lensPosts])
+
+  const selectCategory = (category: string) => {
+    setSelectedCategory(category)
+    setSelectedTag("")
+  }
 
   const filteredPosts = useMemo(() => {
     const needle = searchQuery.trim().toLowerCase()
     return posts.filter((post) => {
       const matchesCategory =
-        selectedCategory === "All" || post.category.includes(selectedCategory)
+        selectedCategory === ALL_CATEGORY || post.category.includes(selectedCategory)
+      const matchesTag = !selectedTag || post.tags.includes(selectedTag)
       const haystack = [post.title, post.summary, ...post.category, ...post.tags]
         .join(" ")
         .toLowerCase()
       const matchesSearch = needle === "" || haystack.includes(needle)
-      return matchesCategory && matchesSearch
+      return matchesCategory && matchesTag && matchesSearch
     })
-  }, [posts, searchQuery, selectedCategory])
+  }, [posts, searchQuery, selectedCategory, selectedTag])
 
   const hasActiveFilter =
-    selectedCategory !== "All" || searchQuery.trim().length > 0
-  const showFeatured = currentPage === 1 && !hasActiveFilter
-  const featuredPosts = showFeatured ? posts.slice(0, FEATURED_POST_COUNT) : []
+    selectedCategory !== ALL_CATEGORY ||
+    selectedTag !== "" ||
+    searchQuery.trim().length > 0
   const regularPosts = hasActiveFilter
     ? filteredPosts
     : getDefaultPagePosts(posts, currentPage)
@@ -99,58 +142,95 @@ export default function HomePageContent({
           </div>
         </section>
 
-        <section className="category-filter-section">
-          <div className="container">
-            <div className="category-buttons">
-              {categoryNames.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  className={`category-btn ${selectedCategory === category ? "active" : ""}`}
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {showFeatured && featuredPosts.length > 0 && (
-          <section className="featured-section">
-            <div className="container">
-              <h3 className="section-title">Featured Article</h3>
-              <div className="featured-grid">
-                {featuredPosts.map((post) => (
-                  <ModernPostCard key={post.id} post={post} />
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
         <section className="posts-section">
           <div className="container">
-            <div className="posts-header">
-              <h3 className="section-title">Latest Articles</h3>
-              <p className="posts-count">{regularPosts.length} articles found</p>
-            </div>
+            <div className="posts-layout">
+              <aside className="posts-sidebar" aria-label="글 필터">
+                <div className="topic-lens">
+                  <div className="topic-lens-header">
+                    <p className="topic-lens-title">Topic Lens</p>
+                    <span className="topic-lens-total">{posts.length}</span>
+                  </div>
 
-            <div className="posts-grid">
-              {regularPosts.map((post) => (
-                <ModernPostCard key={post.id} post={post} />
-              ))}
-            </div>
+                  <div className="topic-lens-category-list">
+                    {sidebarCategories.map((category) => (
+                      <button
+                        key={category.name}
+                        type="button"
+                        className={`topic-lens-category-button ${
+                          selectedCategory === category.name ? "active" : ""
+                        }`}
+                        onClick={() => selectCategory(category.name)}
+                        aria-pressed={selectedCategory === category.name}
+                      >
+                        <span className="topic-lens-category-meta">
+                          <span className="topic-lens-category-name">
+                            {category.name === ALL_CATEGORY ? "전체" : category.name}
+                          </span>
+                          <span className="topic-lens-category-count">
+                            {category.count}
+                          </span>
+                        </span>
+                        <span className="topic-lens-meter" aria-hidden>
+                          <span style={{ width: `${category.ratio}%` }} />
+                        </span>
+                      </button>
+                    ))}
+                  </div>
 
-            {regularPosts.length === 0 && (
-              <div className="no-posts">
-                <p>No articles found matching your criteria.</p>
+                  <div className="topic-lens-keywords">
+                    <p className="topic-lens-keywords-title">관련 키워드</p>
+                    <div className="topic-lens-tag-list">
+                      {relatedTags.map((tag) => (
+                        <button
+                          key={tag.name}
+                          type="button"
+                          className={`topic-lens-tag-button ${
+                            selectedTag === tag.name ? "active" : ""
+                          }`}
+                          onClick={() =>
+                            setSelectedTag((current) =>
+                              current === tag.name ? "" : tag.name
+                            )
+                          }
+                          aria-pressed={selectedTag === tag.name}
+                        >
+                          # {tag.name} · {tag.count}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="topic-lens-links">
+                    <Link href="/categories">전체 주제</Link>
+                    <Link href="/tags">모든 태그</Link>
+                  </div>
+                </div>
+              </aside>
+
+              <div className="posts-main">
+                <div className="posts-header">
+                  <h3 className="section-title">Latest Articles</h3>
+                  <p className="posts-count">{regularPosts.length} articles found</p>
+                </div>
+
+                <div className="posts-grid">
+                  {regularPosts.map((post) => (
+                    <ModernPostCard key={post.id} post={post} />
+                  ))}
+                </div>
+
+                {regularPosts.length === 0 && (
+                  <div className="no-posts">
+                    <p>No articles found matching your criteria.</p>
+                  </div>
+                )}
+
+                {!hasActiveFilter && (
+                  <HomePagination currentPage={currentPage} totalPages={totalPages} />
+                )}
               </div>
-            )}
-
-            {!hasActiveFilter && (
-              <HomePagination currentPage={currentPage} totalPages={totalPages} />
-            )}
+            </div>
           </div>
         </section>
       </div>

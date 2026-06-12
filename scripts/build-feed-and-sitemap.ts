@@ -62,6 +62,7 @@ function buildSitemap(posts: Awaited<ReturnType<typeof getPosts>>) {
   const today = new Date().toISOString().slice(0, 10)
   const entries: { loc: string; lastmod: string; priority: string }[] = [
     { loc: `${SITE_URL}/`, lastmod: today, priority: "1.0" },
+    { loc: `${SITE_URL}/categories/`, lastmod: today, priority: "0.5" },
     { loc: `${SITE_URL}/tags/`, lastmod: today, priority: "0.5" },
     { loc: `${SITE_URL}/about/`, lastmod: today, priority: "0.3" },
     ...posts.map((p) => ({

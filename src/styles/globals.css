@@ -27,6 +27,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 body {
   word-break: keep-all;
   overflow-wrap: anywhere;

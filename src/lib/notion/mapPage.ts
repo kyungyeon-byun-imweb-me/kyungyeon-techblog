@@ -33,6 +33,32 @@ export const findPropId = (
   return null
 }
 
+const findPropIds = (
+  schema: Record<string, { name: string; type: string }>,
+  names: string[]
+): string[] => {
+  const ids: string[] = []
+  const add = (id: string) => {
+    if (!ids.includes(id)) ids.push(id)
+  }
+
+  for (const name of names) {
+    const lower = name.toLowerCase()
+    for (const [id, s] of Object.entries(schema)) {
+      if (s.name?.toLowerCase() === lower) add(id)
+    }
+  }
+
+  for (const name of names) {
+    const lower = name.toLowerCase()
+    for (const [id, s] of Object.entries(schema)) {
+      if ((s.name?.toLowerCase() || "").startsWith(lower)) add(id)
+    }
+  }
+
+  return ids
+}
+
 const richToText = (raw: any[][] | undefined): string => {
   if (!raw) return ""
   return raw.map((seg) => seg?.[0] ?? "").join("")
@@ -70,14 +96,33 @@ const pickMultiSelect = (
     .filter(Boolean)
 }
 
+const timestampToDate = (value: unknown): string => {
+  const date =
+    typeof value === "number"
+      ? new Date(value)
+      : typeof value === "string"
+        ? new Date(value)
+        : null
+  if (!date || Number.isNaN(date.getTime())) return ""
+  return date.toISOString().slice(0, 10)
+}
+
 const pickDate = (block: any, schema: any, names: string[]): string => {
-  const id = findPropId(schema, names)
-  if (!id) return ""
-  const raw = block.properties?.[id]
-  if (!raw) return ""
-  // 구조: [["‣", [["d", { type, start_date, ... }]]]]
-  const formatted = raw?.[0]?.[1]?.[0]?.[1]
-  if (formatted?.start_date) return formatted.start_date as string
+  for (const id of findPropIds(schema, names)) {
+    if (schema[id]?.type === "created_time") {
+      const createdDate = timestampToDate(block.created_time)
+      if (createdDate) return createdDate
+    }
+
+    const raw = block.properties?.[id]
+    if (!raw) continue
+    // 구조: [["‣", [["d", { type, start_date, ... }]]]]
+    const formatted = raw?.[0]?.[1]?.[0]?.[1]
+    if (formatted?.start_date) return formatted.start_date as string
+
+    const text = richToText(raw)
+    if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10)
+  }
   return ""
 }
 
@@ -214,10 +259,8 @@ export const mapBlockToPost = (
     tags: pickMultiSelect(block, schema, ["tags", "태그"]),
     authors: pickAuthors(block, schema, recordMap),
     date:
-      pickDate(block, schema, ["date", "published", "발행일"]) ||
-      (block.created_time
-        ? new Date(block.created_time).toISOString().slice(0, 10)
-        : ""),
+      pickDate(block, schema, ["date", "published", "발행일", "createdAt"]) ||
+      timestampToDate(block.created_time),
     status,
     featured: pickCheckbox(block, schema, ["featured", "추천", "pinned"]),
   }

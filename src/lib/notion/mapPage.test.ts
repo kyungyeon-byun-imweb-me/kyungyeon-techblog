@@ -129,6 +129,33 @@ describe("mapBlockToPost", () => {
     expect(post.date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 
+  it("date 가 비어 있으면 createdAt Created time 속성을 작성일로 쓴다", () => {
+    const { block, recordMap } = blockOf("1", [
+      {
+        id: "1",
+        title: "생성일 글",
+        status: "발행 완료",
+        createdAt: "2026-05-24",
+      },
+    ])
+    const post = mapBlockToPost(block, SCHEMA, recordMap)
+    expect(post.date).toBe("2026-05-24")
+  })
+
+  it("date 와 createdAt 이 모두 있으면 date 를 우선한다", () => {
+    const { block, recordMap } = blockOf("1", [
+      {
+        id: "1",
+        title: "발행일 우선 글",
+        status: "발행 완료",
+        date: "2026-05-13",
+        createdAt: "2026-05-24",
+      },
+    ])
+    const post = mapBlockToPost(block, SCHEMA, recordMap)
+    expect(post.date).toBe("2026-05-13")
+  })
+
   it("status 미지정 시 작성중으로 기본 처리한다", () => {
     const { block, recordMap } = blockOf("1", [{ id: "1", title: "글" }])
     const post = mapBlockToPost(block, SCHEMA, recordMap)

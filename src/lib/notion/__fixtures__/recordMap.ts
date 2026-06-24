@@ -12,6 +12,7 @@ export const PROP = {
   tags: "p_tag",
   summary: "p_sum",
   date: "p_date",
+  createdAt: "p_created",
   thumbnail: "p_thumb",
 } as const
 
@@ -29,6 +30,7 @@ export const SCHEMA = {
   [PROP.tags]: { name: "tags", type: "multi_select" },
   [PROP.summary]: { name: "summary", type: "text" },
   [PROP.date]: { name: "date", type: "date" },
+  [PROP.createdAt]: { name: "createdAt", type: "created_time" },
   [PROP.thumbnail]: { name: "thumbnail", type: "file" },
 }
 
@@ -41,6 +43,7 @@ export type PostInput = {
   tags?: string[]
   summary?: string
   date?: string // ISO "YYYY-MM-DD"
+  createdAt?: string // ISO "YYYY-MM-DD"
   thumbnail?: string
   type?: string // 기본 "page"
 }
@@ -74,7 +77,7 @@ const buildBlock = (post: PostInput) => {
       id: post.id,
       type: post.type ?? "page",
       properties,
-      created_time: Date.parse("2026-01-01"),
+      created_time: Date.parse(post.createdAt ?? "2026-01-01"),
     },
   }
 }

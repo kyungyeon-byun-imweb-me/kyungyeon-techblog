@@ -42,7 +42,7 @@ GitHub Actions 배포에서는 저장소 `Settings → Secrets and variables →
 | `category` | Multi-select | `category`, `카테고리` | 홈 카테고리 필터 |
 | `tags` | Multi-select | `tags`, `태그` | 검색/상세 태그 |
 | `summary` | Text | `summary`, `description`, `요약` | 카드/SEO 설명 |
-| `date` | Date | `date`, `published`, `발행일` | 최신순 정렬 |
+| `date` | Date / Created time | `date`, `published`, `발행일`, `createdAt` | 최신순 정렬. `date`가 비어 있으면 `createdAt` Created time 속성 또는 페이지 `created_time` 사용 |
 | `thumbnail` | File | `thumbnail`, `cover`, `썸네일` | 카드/상세 커버 |
 | `author` | Person | `author`, `authors`, `작성자` | 상세 메타 |
 | `featured` | Checkbox | `featured`, `추천`, `pinned` | 홈 Featured 우선 노출 |

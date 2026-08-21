@@ -6,7 +6,23 @@ import type { ExtendedRecordMap } from "notion-types"
 
 // 비공식(public) Notion API 클라이언트.
 // 토큰이 필요 없으며, 노션 페이지가 "웹에 게시(Share to web)" 되어 있어야 합니다.
-const notion = new NotionAPI()
+//
+// Notion 앞단의 Cloudflare는 User-Agent가 없는 Node.js 요청을 403으로 차단합니다.
+// 생성자 옵션에 넣어 loadPageChunk뿐 아니라 collection/user 요청에도 공통 적용합니다.
+export const NOTION_USER_AGENT =
+  process.env.NOTION_USER_AGENT ||
+  "Mozilla/5.0 (compatible; KyungyeonTechblog/1.0; +https://kyungyeon.dev)"
+
+export const createNotionClient = (): NotionAPI =>
+  new NotionAPI({
+    ofetchOptions: {
+      headers: {
+        "User-Agent": NOTION_USER_AGENT,
+      },
+    },
+  })
+
+const notion = createNotionClient()
 
 type PageCacheEntry = {
   promise?: Promise<ExtendedRecordMap>
